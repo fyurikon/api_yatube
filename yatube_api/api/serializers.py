@@ -6,7 +6,7 @@ from posts.models import Comment, Group, Post
 
 class PostSerializer(serializers.ModelSerializer):
     """Post serializer."""
-    author = serializers.StringRelatedField(validators=[validate_slug])
+    author = serializers.StringRelatedField()
 
     class Meta:
         model = Post
@@ -22,7 +22,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     """Comment serializer."""
-    author = serializers.StringRelatedField(validators=[validate_slug])
+    author = serializers.StringRelatedField()
 
     class Meta:
         model = Comment
