@@ -1,23 +1,16 @@
 from django.shortcuts import get_object_or_404
-from posts.models import Group, Post
 from rest_framework import viewsets
-from rest_framework.permissions import (SAFE_METHODS, BasePermission,
-                                        IsAuthenticated)
 
+from posts.models import Group, Post
 from .serializers import CommentSerializer, GroupSerializer, PostSerializer
-
-
-class OnlyAuthorCanModify(BasePermission):
-    """Only author can modify. Others read only."""
-    def has_object_permission(self, request, view, obj):
-        return request.method in SAFE_METHODS or obj.author == request.user
+from .permissions import OnlyAuthorCanModify
 
 
 class PostViewSet(viewsets.ModelViewSet):
     """Post viewset."""
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated, OnlyAuthorCanModify)
+    permission_classes = (OnlyAuthorCanModify,)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -26,15 +19,16 @@ class PostViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     """Comment viewset."""
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticated, OnlyAuthorCanModify)
+    permission_classes = (OnlyAuthorCanModify,)
+
+    def get_post(self):
+        return get_object_or_404(Post, pk=self.kwargs.get('post_id'))
 
     def get_queryset(self):
-        post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
-        return post.comments.all()
+        return self.get_post().comments.all()
 
     def perform_create(self, serializer):
-        post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
-        serializer.save(author=self.request.user, post=post)
+        serializer.save(author=self.request.user, post=self.get_post())
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
