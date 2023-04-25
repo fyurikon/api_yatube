@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 
 User = get_user_model()
+POST_TEXT_LIMIT = 15
 
 
 class Group(models.Model):
@@ -73,7 +74,7 @@ class Comment(models.Model):
         verbose_name='Публикация',
     )
 
-    text = models.TextField('Текст комментария', help_text='Введите текст',)
+    text = models.TextField('Текст комментария', help_text='Введите текст', )
     created = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
     )
@@ -81,3 +82,6 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return self.text[:POST_TEXT_LIMIT]
